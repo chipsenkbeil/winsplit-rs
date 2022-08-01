@@ -1,13 +1,13 @@
 [package]
 name = "winsplit"
-description = "Library to split string into command line arguments"
+description = "Library to split string into command line arguments mirroring CommandLineToArgV"
 categories = []
 keywords = ["split", "windows", "shell", "quote", "words"]
 version = "0.1.0"
 authors = ["Chip Senkbeil <chip@senkbeil.org>"]
 edition = "2021"
-homepage = "https://github.com/chipsenkbeil/winsplit"
-repository = "https://github.com/chipsenkbeil/winsplit"
+homepage = "https://github.com/chipsenkbeil/winsplit-rs"
+repository = "https://github.com/chipsenkbeil/winsplit-rs"
 readme = "README.md"
 license = "MIT OR Apache-2.0"
 
