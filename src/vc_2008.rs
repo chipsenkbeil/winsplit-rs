@@ -3,7 +3,31 @@
 //! advantage of Windows parameter parsing should be expected to abide by the modern rules given
 //! that Windows Vista was released in 2006.
 //!
+//! ### C++ Rules
+//!
+//! These are the rules for parsing a command line passed by CreateProcess() to a program written
+//! in C/C++:
+//!
+//! 1. Parameters are always separated by a space or tab (multiple spaces/tabs OK)
+//! 2. If the parameter does not contain any spaces, tabs, or double quotes, then all the
+//!    characters in the parameter are accepted as is (there is no need to enclose the parameter in
+//!    double quotes).
+//! 3. Enclose spaces and tabs in a double quoted part
+//! 4. A double quoted part can be anywhere within a parameter
+//! 5. 2n backslashes followed by a " produce n backslashes + start/end double quoted part
+//! 6. 2n+1 backslashes followed by a " produce n backslashes + a literal quotation mark
+//! 7. n backslashes not followed by a quotation mark produce n backslashes
+//!
+//! Undocumented rules regarding double quotes post 2008:
+//!
+//! 1. Outside a double quoted block a " starts a double quoted block.
+//! 2. Inside a double quoted block a " followed by a different character (not another ") ends the
+//!    double quoted block.
+//! 3. Inside a double quoted block a " followed immediately by another " (i.e. "") causes a single
+//!    " to be added to the output, and the double quoted block continues.
+//!
 //! ### Parsing Examples
+//!
 //! Command-Line | argv\[1\] | Comment
 //! -- | -- | --
 //! CallMeIshmael | CallMeIshmael | a plain parameter can contain any characters except {space} {tab}  \\  "
