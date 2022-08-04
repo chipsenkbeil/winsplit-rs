@@ -131,6 +131,9 @@ pub fn parse(s: &str) -> lib::Vec<lib::String> {
         // True if we have an odd number of backslashes
         let even_backslash_cnt = backslash_cnt % 2 == 0;
 
+        // Flag to skip adding the character (for use when starting a quote)
+        let mut skip_adding_char = false;
+
         match c {
             // Backslash should just increase the count without immediately adding the char
             '\\' => {
@@ -153,7 +156,12 @@ pub fn parse(s: &str) -> lib::Vec<lib::String> {
                 // Flag that we are no longer in a quote
                 in_quote = false;
 
+                // Don't add this doublequote as it is just marking the end of a quote
+                skip_adding_char = true;
+
                 // Set backslash cnt to N/2 so we add N/2
+                //
+                // 2N backslashes -> N backslashes + end quote
                 backslash_cnt /= 2;
             }
 
@@ -162,15 +170,28 @@ pub fn parse(s: &str) -> lib::Vec<lib::String> {
                 // Flag that we are now in a quote
                 in_quote = true;
 
+                // Don't add this doublequote as it is just marking the start of a quote
+                skip_adding_char = true;
+
                 // Set backslash cnt to N/2 so we add N/2
+                //
+                // 2N backslashes -> N backslashes + start quote
                 backslash_cnt /= 2;
             }
 
-            // Quote with even number of backslashes or anything else
+            // Quote with odd number of backslashes
+            '"' => {
+                // Set backslash cnt to N/2 so we add N/2
+                //
+                // 2N + 1 backslashes -> N backslashes + literal quote
+                backslash_cnt /= 2;
+            }
+
+            // Quote with odd number of backslashes or anything else
             _ => {}
         }
 
-        // Add backslashes to arg and reset
+        // Add backslashes to arg and reset counter
         if backslash_cnt > 0 {
             add_n_backslashes(&mut arg, backslash_cnt);
             backslash_cnt = 0;
@@ -179,11 +200,18 @@ pub fn parse(s: &str) -> lib::Vec<lib::String> {
         // If we are in a quote, then we should consume everything,
         // otherwise once we hit whitespace we want to finish the arg
         if !in_quote && is_whitespace_or_null(c) {
-            args.push(arg);
-            arg = lib::String::new();
-        } else {
+            if !arg.is_empty() {
+                args.push(arg);
+                arg = lib::String::new();
+            }
+        } else if !skip_adding_char {
             arg.push(c);
         }
+    }
+
+    // Add any remaining backslashes as these were at the end of the string
+    if backslash_cnt > 0 {
+        add_n_backslashes(&mut arg, backslash_cnt);
     }
 
     if !arg.is_empty() {
@@ -262,31 +290,25 @@ mod tests {
     #[test]
     fn should_support_escaping_quotes() {
         let args = parse(r#"one \"two\" "three four" five"#);
-        assert_eq!(args, &["one", r#"\"two\""#, "three four", "five"]);
+        assert_eq!(args, &["one", r#""two""#, "three four", "five"]);
     }
 
     #[test]
-    fn should_support_escaping_the_escape_character() {
+    fn should_keep_escape_character_if_not_following_double_quote() {
         let args = parse(r"\\\\");
-        assert_eq!(args, &[r"\\"]);
+        assert_eq!(args, &[r"\\\\"]);
     }
 
     #[test]
     fn should_support_escaping_the_escape_character_and_quote() {
         let args = parse(r#"\\\\\" some quote "#);
-        assert_eq!(args, &[r#"\\"#, "some quote"]);
+        assert_eq!(args, &[r#"\\""#, "some", "quote"]);
     }
 
     #[test]
-    fn should_support_empty_quotes_as_an_argument() {
-        let args = parse(r#"one "" three"#);
-        assert_eq!(args, &["one", "", "three"]);
-    }
-
-    #[test]
-    fn should_support_quotes_within_quotes() {
-        let args = parse(r#"one "" three"#);
-        assert_eq!(args, &[r#"\\"#, "some quote"]);
+    fn should_support_closing_quote_followed_by_another_quote_including_a_quote() {
+        let args = parse(r#"one "two"" three"#);
+        assert_eq!(args, &["one", "two\" three"]);
     }
 
     // Extra tests from https://daviddeley.com/autohotkey/parameters/parameters.htm#WIN
@@ -363,9 +385,9 @@ mod tests {
             assert_eq!(parse(r#""a b c"""#), &[r#"a b c""#]);
             assert_eq!(
                 parse(r#""""CallMeIshmael"""  b  c"#),
-                &[r#""Call Me Ishmael""#, "b", "c"]
+                &[r#""CallMeIshmael""#, "b", "c"]
             );
-            assert_eq!(parse(r#""""CallMeIshmael""""#), &[r#""Call Me Ishmael""#]);
+            assert_eq!(parse(r#""""Call Me Ishmael""""#), &[r#""Call Me Ishmael""#]);
             assert_eq!(
                 parse(r#"""""Call Me Ishmael"" b c"#),
                 &[r#""Call"#, "Me", "Ishmael", "b", "c"]
