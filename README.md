@@ -1,5 +1,18 @@
 # winsplit
 
+[![Crates.io][crates_img]][crates_lnk]
+[![Docs][docs_img]][docs_lnk]
+[![CI][ci_img]][ci_lnk]
+
+[ci_img]: https://github.com/chipsenkbeil/winsplit-rs/actions/workflows/ci.yml/badge.svg
+[ci_lnk]: https://github.com/chipsenkbeil/winsplit-rs/actions/workflows/ci.yml
+
+[crates_img]: https://img.shields.io/crates/v/winsplit.svg
+[crates_lnk]: https://crates.io/crates/winsplit
+
+[docs_img]: https://docs.rs/winsplit/badge.svg
+[docs_lnk]: https://docs.rs/winsplit
+
 Like [shell-words](https://crates.io/crates/shell-words), but for Windows that
 somewhat mirrors
 [CommandLineToArgvW](https://docs.microsoft.com/en-us/windows/win32/api/shellapi/nf-shellapi-commandlinetoargvw),
