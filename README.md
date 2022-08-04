@@ -15,8 +15,19 @@ winsplit = "0.1"
 ## Usage
 
 ```rust
-let args = winsplit::split(r#"C:\ProgramFiles\Example\example.exe --key "some value" arg1 arg2"#);
-assert_eq!(args, &[r"C:\ProgramFiles\Example\example.exe", "--key", "some value", "arg1", "arg2"]);
+let args = winsplit::split(
+    r#"C:\ProgramFiles\Example\example.exe --key "some value" arg1 arg2"#
+);
+assert_eq!(
+    args, 
+    &[
+        r"C:\ProgramFiles\Example\example.exe",
+        "--key",
+        "some value",
+        "arg1",
+        "arg2"
+    ]
+);
 ```
 
 ## Parsing Rules
