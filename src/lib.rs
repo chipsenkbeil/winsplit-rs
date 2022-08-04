@@ -1,5 +1,7 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 #![forbid(unsafe_code)]
+#[cfg(not(feature = "std"))]
+extern crate alloc;
 
 mod lib {
     #[cfg(feature = "std")]
@@ -7,10 +9,6 @@ mod lib {
 
     pub use core::fmt;
     pub use core::mem;
-
-    #[cfg(not(feature = "std"))]
-    #[macro_use]
-    extern crate alloc;
 
     #[cfg(not(feature = "std"))]
     pub use alloc::string::String;

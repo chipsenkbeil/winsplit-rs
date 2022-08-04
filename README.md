@@ -5,11 +5,25 @@ somewhat mirrors
 [CommandLineToArgvW](https://docs.microsoft.com/en-us/windows/win32/api/shellapi/nf-shellapi-commandlinetoargvw),
 following VC++ 2008 parsing rules.
 
+Written purely in Rust, so runs on any operating system! Windows is _not_ a
+requirement!
+
+Minimum tested Rust version is `1.56.1`, but this may compile and work on
+earlier versions!
+
 ## Installation
 
 ```toml
 [Dependencies]
 winsplit = "0.1"
+```
+
+If you want to use this without `std` library, this library can be compiled for
+use with `alloc` by disabling the `std` feature:
+
+```toml
+[Dependencies]
+winsplit = { version = "0.1", default-features = false }
 ```
 
 ## Usage

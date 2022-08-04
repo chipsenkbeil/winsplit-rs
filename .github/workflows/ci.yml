@@ -1,0 +1,78 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  clippy:
+    name: "Lint with clippy (${{ matrix.os }})"
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { os: ubuntu-latest }
+    env:
+      RUSTFLAGS: -Dwarnings
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install Rust (clippy)
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          components: clippy
+      - uses: Swatinem/rust-cache@v1
+      - name: Check Cargo availability
+        run: cargo --version
+      - name: Check with clippy
+        run: cargo clippy --all-targets --verbose --all-features
+  rustfmt:
+    name: "Verify code formatting (${{ matrix.os }})"
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { os: ubuntu-latest }
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install Rust (rustfmt)
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          components: rustfmt
+      - uses: Swatinem/rust-cache@v1
+      - name: Check Cargo availability
+        run: cargo --version
+      - run: cargo fmt --all -- --check
+  tests:
+    name: "Test Rust ${{ matrix.rust }} on ${{ matrix.os }}"
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { rust: stable, os: ubuntu-latest }
+          - { rust: 1.56.1, os: ubuntu-latest }
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install Rust ${{ matrix.rust }}
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: ${{ matrix.rust }}
+          target: ${{ matrix.target }}
+      - uses: Swatinem/rust-cache@v1
+      - name: Check Cargo availability
+        run: cargo --version
+      - name: Run tests
+        run: cargo test --release --verbose
+      - name: Run tests (no std)
+        run: cargo test --no-default-features --release --verbose

@@ -1,6 +1,6 @@
 [package]
 name = "winsplit"
-description = "Library to split string into command line arguments mirroring CommandLineToArgV"
+description = "Library to split string into command line arguments mirroring CommandLineToArgV with VC++ 2008 parsing rules"
 categories = []
 keywords = ["split", "windows", "shell", "quote", "words"]
 version = "0.1.0"
