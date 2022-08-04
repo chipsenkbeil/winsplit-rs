@@ -311,6 +311,12 @@ mod tests {
         assert_eq!(args, &["one", "two\" three"]);
     }
 
+    #[test]
+    fn should_support_tabs_as_delimiters() {
+        let args = parse(" \ta \tb\t c\t ");
+        assert_eq!(args, &["a", "b", "c"]);
+    }
+
     // Extra tests from https://daviddeley.com/autohotkey/parameters/parameters.htm#WIN
     mod extra_from_david_deley {
         use super::*;
