@@ -2,17 +2,34 @@
 
 Like [shell-words](https://crates.io/crates/shell-words), but for Windows that
 somewhat mirrors
-[CommandLineToArgvW](https://docs.microsoft.com/en-us/windows/win32/api/shellapi/nf-shellapi-commandlinetoargvw).
+[CommandLineToArgvW](https://docs.microsoft.com/en-us/windows/win32/api/shellapi/nf-shellapi-commandlinetoargvw),
+following VC++ 2008 parsing rules.
 
-Specifically, this library follows the 2008 parsing rules for VC++ 9.9
-(msvcr90.dll) that was released with Visual Studio 2008. See [C/C++ parameter
-parsing rules](https://daviddeley.com/autohotkey/parameters/parameters.htm#WIN)
-for more details.
+## Installation
 
-<figure>
-<img src="https://user-images.githubusercontent.com/2481802/182859707-008040c5-39eb-4e2a-949a-89911fa5a973.png" alt="Trulli" style="width:100%">
-<figcaption align = "center"><b>Parsing Rules for VC++ 2008</b></figcaption>
-</figure>
+```toml
+[Dependencies]
+winsplit = "0.1"
+```
+
+## Usage
+
+```rust
+let args = winsplit::split(r#"C:\ProgramFiles\Example\example.exe --key "some value" arg1 arg2"#);
+assert_eq!(args, &[r"C:\ProgramFiles\Example\example.exe", "--key", "some value", "arg1", "arg2"]);
+```
+
+## Parsing Rules
+
+This library follows the 2008 parsing rules for VC++ 9.9 (msvcr90.dll) that was
+released with Visual Studio 2008. See [C/C++ parameter parsing
+rules](https://daviddeley.com/autohotkey/parameters/parameters.htm#WIN) for
+more details.
+
+You can also check out the mirror of the rules and examples at the [wiki
+documentation
+page](https://github.com/chipsenkbeil/winsplit-rs/wiki/Argument-Parsing-Process-w--Examples)
+for this repository.
 
 ## Special Thanks
 

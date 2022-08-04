@@ -32,3 +32,7 @@ pub mod vc_2008;
 
 /// Splits the given str into arguments following VC++ 2008 rules
 pub use vc_2008::parse as split;
+
+// Test our README examples as part of doctest
+#[cfg(doctest)]
+doc_comment::doctest!("../README.md");
