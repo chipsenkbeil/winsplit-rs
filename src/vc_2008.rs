@@ -140,8 +140,8 @@
 //! ![parsingrules](https://user-images.githubusercontent.com/2481802/182859707-008040c5-39eb-4e2a-949a-89911fa5a973.png)
 use crate::lib;
 
-/// Parses a command line string into arguments using the VC++ 2008 rules
-pub fn parse(s: &str) -> lib::Vec<lib::String> {
+/// Splits a command line string into arguments using the VC++ 2008 rules.
+pub fn split(s: &str) -> lib::Vec<lib::String> {
     let mut args = lib::Vec::new();
     let mut arg = lib::String::new();
     let mut backslash_cnt = 0;
@@ -268,19 +268,19 @@ mod tests {
 
     #[test]
     fn should_support_single_word() {
-        let args = parse("word");
+        let args = split("word");
         assert_eq!(args, &["word"]);
     }
 
     #[test]
     fn should_support_program_path_at_beginning() {
-        let args = parse(r"C:\path\to\program.exe");
+        let args = split(r"C:\path\to\program.exe");
         assert_eq!(args, &[r"C:\path\to\program.exe"]);
     }
 
     #[test]
     fn should_support_quoted_path_at_beginning() {
-        let args = parse(r#""C:\path\to the\program.exe" arg -arg2 --arg3"#);
+        let args = split(r#""C:\path\to the\program.exe" arg -arg2 --arg3"#);
         assert_eq!(
             args,
             &[r"C:\path\to the\program.exe", "arg", "-arg2", "--arg3"]
@@ -289,55 +289,55 @@ mod tests {
 
     #[test]
     fn should_support_quoted_args() {
-        let args = parse(r#""quoted arg""#);
+        let args = split(r#""quoted arg""#);
         assert_eq!(args, &[r"quoted arg"]);
     }
 
     #[test]
     fn should_trim_whitespace_at_front() {
-        let args = parse(" \targ");
+        let args = split(" \targ");
         assert_eq!(args, &[r"arg"]);
     }
 
     #[test]
     fn should_support_multiple_args() {
-        let args = parse("one two three");
+        let args = split("one two three");
         assert_eq!(args, &["one", "two", "three"]);
     }
 
     #[test]
     fn should_support_multiple_args_with_quotes() {
-        let args = parse(r#"one "two and uh" three"#);
+        let args = split(r#"one "two and uh" three"#);
         assert_eq!(args, &["one", "two and uh", "three"]);
     }
 
     #[test]
     fn should_support_escaping_quotes() {
-        let args = parse(r#"one \"two\" "three four" five"#);
+        let args = split(r#"one \"two\" "three four" five"#);
         assert_eq!(args, &["one", r#""two""#, "three four", "five"]);
     }
 
     #[test]
     fn should_keep_escape_character_if_not_following_double_quote() {
-        let args = parse(r"\\\\");
+        let args = split(r"\\\\");
         assert_eq!(args, &[r"\\\\"]);
     }
 
     #[test]
     fn should_support_escaping_the_escape_character_and_quote() {
-        let args = parse(r#"\\\\\" some quote "#);
+        let args = split(r#"\\\\\" some quote "#);
         assert_eq!(args, &[r#"\\""#, "some", "quote"]);
     }
 
     #[test]
     fn should_support_closing_quote_followed_by_another_quote_including_a_quote() {
-        let args = parse(r#"one "two"" three"#);
+        let args = split(r#"one "two"" three"#);
         assert_eq!(args, &["one", "two\" three"]);
     }
 
     #[test]
     fn should_support_tabs_as_delimiters() {
-        let args = parse(" \ta \tb\t c\t ");
+        let args = split(" \ta \tb\t c\t ");
         assert_eq!(args, &["a", "b", "c"]);
     }
 
@@ -348,103 +348,103 @@ mod tests {
         #[test]
         fn examples() {
             // Single word is okay
-            assert_eq!(parse("CallMeIshmael"), &["CallMeIshmael"]);
+            assert_eq!(split("CallMeIshmael"), &["CallMeIshmael"]);
 
             // Quotes can be used to include whitespace in parameter
-            assert_eq!(parse(r#""Call Me Ishmael""#), &["Call Me Ishmael"]);
+            assert_eq!(split(r#""Call Me Ishmael""#), &["Call Me Ishmael"]);
 
             // Quotes can be anywhere in parameter
-            assert_eq!(parse(r#"Cal"l Me I"shmael"#), &["Call Me Ishmael"]);
+            assert_eq!(split(r#"Cal"l Me I"shmael"#), &["Call Me Ishmael"]);
 
             // Escaped quote yields just the quote
-            assert_eq!(parse(r#"CallMe\"Ishmael"#), &[r#"CallMe"Ishmael"#]);
+            assert_eq!(split(r#"CallMe\"Ishmael"#), &[r#"CallMe"Ishmael"#]);
 
             // Escaped quote yields just the quote even within a quote
-            assert_eq!(parse(r#""CallMe\"Ishmael""#), &[r#"CallMe"Ishmael"#]);
+            assert_eq!(split(r#""CallMe\"Ishmael""#), &[r#"CallMe"Ishmael"#]);
 
             // Multiple backslash get converted
             //
             // \\\" -> \"
             // (\\ -> \) (\" -> ")
-            assert_eq!(parse(r#""CallMe\\\"Ishmael""#), &[r#"CallMe\"Ishmael"#]);
+            assert_eq!(split(r#""CallMe\\\"Ishmael""#), &[r#"CallMe\"Ishmael"#]);
 
             // Backslashes not followed immediately by a double quotation mark are interpreted
             // literally
-            assert_eq!(parse(r"a\\\b"), &[r"a\\\b"]);
+            assert_eq!(split(r"a\\\b"), &[r"a\\\b"]);
 
             // Backslashes not followed immediately by a double quotation mark are interpreted
             // literally even within quotes
-            assert_eq!(parse(r#""a\\\b""#), &[r"a\\\b"]);
+            assert_eq!(split(r#""a\\\b""#), &[r"a\\\b"]);
         }
 
         #[test]
         fn common_tasks() {
             // Parameter includes double quotes
-            assert_eq!(parse(r#""\"Call Me Ishmael\"""#), &[r#""Call Me Ishmael""#]);
+            assert_eq!(split(r#""\"Call Me Ishmael\"""#), &[r#""Call Me Ishmael""#]);
 
             // Parameter includes trailing slash
-            assert_eq!(parse(r#""C:\TEST A\\""#), &[r"C:\TEST A\"]);
+            assert_eq!(split(r#""C:\TEST A\\""#), &[r"C:\TEST A\"]);
 
             // Parameter includes double quotes and trailing slash
-            assert_eq!(parse(r#""\"C:\TEST A\\\"""#), &[r#""C:\TEST A\""#]);
+            assert_eq!(split(r#""\"C:\TEST A\\\"""#), &[r#""C:\TEST A\""#]);
         }
 
         #[test]
         fn explained_examples() {
             // Spaces enclosed in double quotes
-            assert_eq!(parse(r#""a b c"  d  e"#), &["a b c", "d", "e"]);
+            assert_eq!(split(r#""a b c"  d  e"#), &["a b c", "d", "e"]);
 
             // Some escaped quotes
-            assert_eq!(parse(r#""ab\"c"  "\\"  d"#), &[r#"ab"c"#, r"\", "d"]);
+            assert_eq!(split(r#""ab\"c"  "\\"  d"#), &[r#"ab"c"#, r"\", "d"]);
 
             // Backslashes not followed immediately by a double quotation mark are interpreted
             // literally
-            assert_eq!(parse(r#"a\\\b d"e f"g h"#), &[r"a\\\b", "de fg", "h"]);
+            assert_eq!(split(r#"a\\\b d"e f"g h"#), &[r"a\\\b", "de fg", "h"]);
 
             // 2n+1 backslashes before " → n backslashes + a literal "
-            assert_eq!(parse(r#"a\\\"b c d"#), &[r#"a\"b"#, "c", "d"]);
+            assert_eq!(split(r#"a\\\"b c d"#), &[r#"a\"b"#, "c", "d"]);
 
             // 2n backslashes followed by a " produce n backslashes + start/end double quoted part
             //
             // the space enclosed in double quotation marks is not a delimiter
-            assert_eq!(parse(r#"a\\\\"b c" d e"#), &[r"a\\b c", "d", "e"]);
+            assert_eq!(split(r#"a\\\\"b c" d e"#), &[r"a\\b c", "d", "e"]);
         }
 
         #[test]
         fn double_double_quote_examples() {
-            assert_eq!(parse(r#""a b c"""#), &[r#"a b c""#]);
+            assert_eq!(split(r#""a b c"""#), &[r#"a b c""#]);
             assert_eq!(
-                parse(r#""""CallMeIshmael"""  b  c"#),
+                split(r#""""CallMeIshmael"""  b  c"#),
                 &[r#""CallMeIshmael""#, "b", "c"]
             );
-            assert_eq!(parse(r#""""Call Me Ishmael""""#), &[r#""Call Me Ishmael""#]);
+            assert_eq!(split(r#""""Call Me Ishmael""""#), &[r#""Call Me Ishmael""#]);
             assert_eq!(
-                parse(r#"""""Call Me Ishmael"" b c"#),
+                split(r#"""""Call Me Ishmael"" b c"#),
                 &[r#""Call"#, "Me", "Ishmael", "b", "c"]
             );
         }
 
         #[test]
         fn triple_double_quote_examples() {
-            assert_eq!(parse(r#""""Call Me Ishmael""""#), &[r#""Call Me Ishmael""#]);
+            assert_eq!(split(r#""""Call Me Ishmael""""#), &[r#""Call Me Ishmael""#]);
 
             // Same as above
-            assert_eq!(parse(r#"\""Call Me Ishmael"\""#), &[r#""Call Me Ishmael""#]);
+            assert_eq!(split(r#"\""Call Me Ishmael"\""#), &[r#""Call Me Ishmael""#]);
 
             // Same as above
-            assert_eq!(parse(r#""\"Call Me Ishmael\"""#), &[r#""Call Me Ishmael""#]);
+            assert_eq!(split(r#""\"Call Me Ishmael\"""#), &[r#""Call Me Ishmael""#]);
         }
 
         #[test]
         fn quadruple_double_quote_examples() {
             assert_eq!(
-                parse(r#"""""Call Me Ishmael"""""#),
+                split(r#"""""Call Me Ishmael"""""#),
                 &["\"Call", "Me", "Ishmael\""]
             );
 
             // Same as above
             assert_eq!(
-                parse(r#"\"Call Me Ishmael\""#),
+                split(r#"\"Call Me Ishmael\""#),
                 &["\"Call", "Me", "Ishmael\""]
             );
         }

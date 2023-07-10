@@ -26,10 +26,9 @@ mod lib {
     pub use std::borrow::Cow;
 }
 
+pub mod cmd_exe;
+pub mod powershell;
 pub mod vc_2008;
-
-/// Splits the given str into arguments following VC++ 2008 rules
-pub use vc_2008::parse as split;
 
 // Test our README examples as part of doctest
 #[cfg(doctest)]
